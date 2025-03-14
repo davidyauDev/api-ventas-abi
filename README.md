@@ -1,66 +1,70 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+## Instrucciones de Configuración
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+1. **Crear el archivo `.env`**:  
+   Copia el archivo `.env.example` a `.env` y configura las variables de entorno (por ejemplo, conexión a la base de datos, clave de la aplicación, etc.).
 
-## About Laravel
+    ```bash
+    cp .env.example .env
+    php artisan key:generate
+    ```
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+2. **Ejecutar migraciones y seeders**:  
+   Usa el siguiente comando para ejecutar todas las migraciones y poblar la base de datos al mismo tiempo:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+    ```bash
+    php artisan migrate --seed
+    ```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+3. **Iniciar el servidor de desarrollo**:  
+   Ejecuta el servidor de desarrollo de Laravel para iniciar la aplicación:
+    ```bash
+    php artisan serve
+    ```
 
-## Learning Laravel
+# Diseño y Decisiones Técnicas
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Este proyecto sigue una arquitectura basada en **API RESTful**, diseñada para ser escalable, mantenible y fácil de extender. A continuación, se describen las principales decisiones técnicas:
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Arquitectura
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+-   **Modularidad**: El código está organizado en módulos para separar responsabilidades y facilitar el mantenimiento.
+-   **Controladores y Servicios**: Los controladores manejan las solicitudes HTTP, mientras que la lógica de negocio se delega a los servicios.
+-   **Repositorios**: Se utiliza un patrón de repositorio para interactuar con la base de datos, lo que permite desacoplar la lógica de acceso a datos.
+-   **Interfaces**: Las interfaces definen contratos claros entre las capas, facilitando la implementación y pruebas.
+-   **Traits**: Se utilizan Traits para encapsular funcionalidades reutilizables y reducir la duplicación de código.
+-   **Requests**: Las clases de Request se utilizan para validar y sanitizar los datos de entrada, asegurando que las solicitudes sean consistentes y seguras.
+-   **Base de Datos**: Se utiliza **MySQL** como sistema de gestión de bases de datos, aprovechando su robustez y soporte para transacciones complejas.
+-   **ORM**: Se utiliza **Eloquent** como ORM para simplificar las operaciones con la base de datos y manejar relaciones como "muchos a muchos".
+-   **Autenticación**: Laravel Sanctum se utiliza para gestionar la autenticación basada en tokens, proporcionando seguridad y facilidad de uso.
 
-## Laravel Sponsors
+## Relaciones y Transacciones
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+-   **Relaciones**: Se implementó una relación de "muchos a muchos" entre las tablas principales mediante una tabla intermedia llamada `sale_details`. Esta tabla almacena información detallada sobre cada venta, como productos y cantidades.
+-   **Transacciones**: Para registrar una venta, se utiliza Eloquent junto con transacciones de base de datos. Esto asegura que:
+    1. Se cree un registro en la tabla `sales`.
+    2. Se inserten los detalles de la venta en la tabla `sale_details`.
+    3. Si ocurre algún error durante el proceso, todos los cambios se revierten automáticamente para mantener la consistencia de los datos.
 
-### Premium Partners
+## Estructura de Carpetas
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+El proyecto sigue una estructura organizada para facilitar el mantenimiento y la escalabilidad:
 
-## Contributing
+-   **Controllers**: Manejan las solicitudes HTTP y delegan la lógica de negocio a los servicios.
+-   **Services**: Contienen la lógica de negocio principal, separada de los controladores.
+-   **Repositories**: Gestionan el acceso a la base de datos utilizando Eloquent.
+-   **Interfaces**: Definen contratos para los repositorios, asegurando que las implementaciones sean consistentes.
+-   **Traits**: Encapsulan funcionalidades reutilizables, como manejo de respuestas o lógica común.
+-   **Requests**: Validan y procesan los datos de entrada antes de que lleguen a los controladores.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Decisiones Técnicas
 
-## Code of Conduct
+1. **Framework**: Se eligió Laravel por su robustez, comunidad activa y herramientas integradas como Eloquent y Sanctum.
+2. **Autenticación**: Laravel Sanctum se utiliza para gestionar la autenticación basada en tokens.
+3. **Validación**: Las clases de Request se utilizan para validar los datos de entrada de manera centralizada.
+4. **Manejo de Errores**: Se implementó un manejo uniforme de errores utilizando Traits y excepciones personalizadas.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Retos Técnicos
 
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+1. **Gestión de Transacciones**: Implementar transacciones con Eloquent para garantizar la consistencia de los datos fue un desafío, especialmente al manejar múltiples tablas relacionadas.
+2. **Optimización de Consultas**: Diseñar consultas eficientes para manejar grandes volúmenes de datos en `sale_details` sin afectar el rendimiento.
+3. **Relaciones Complejas**: Configurar correctamente las relaciones "muchos a muchos" en Eloquent, asegurando que las claves foráneas y las restricciones sean consistentes.
